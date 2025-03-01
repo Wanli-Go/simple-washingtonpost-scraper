@@ -6,7 +6,7 @@ import pyperclip
 # Modify Proxy as needed
 proxy_url = 'http://127.0.0.1:33210'
 
-def convert_to_markdown(header, metered_content):
+def convert_to_markdown(header, img, metered_content):
     """Convert HTML elements to Markdown format"""
     markdown = []
 
@@ -16,7 +16,8 @@ def convert_to_markdown(header, metered_content):
         elif elem.name == 'p':
             markdown.append(f"#### **{elem.get_text().strip()}**")
     
-    markdown.append("----");
+    for elem in img:
+        markdown.append(f"![{elem.get('alt', '')}]({elem.get('srcset', '').split(',')[-1].split(' ')[0]})") # Get the highest resolution
     
     for elem in metered_content.find_all(True):
         # Skip unnecessary elements
@@ -61,7 +62,7 @@ def convert_to_markdown(header, metered_content):
                 
     return '\n'.join(markdown)
 
-def get_metered_content(url):
+def get_article_content(url):
     global base_url
     base_url = url
 
@@ -93,16 +94,19 @@ def get_metered_content(url):
 
     soup = BeautifulSoup(response.content, 'html.parser')
     header = soup.find('header')
+    header = header or soup.find('div', class_='grid-full-bleed')
+    img = soup.find_all('img', {'fetchpriority': 'high'})
     metered_content = soup.find('div', class_='meteredContent')
+    
     
     if not metered_content:
         return "No metered content found on the page"
     
-    return convert_to_markdown(header, metered_content)
+    return convert_to_markdown(header, img, metered_content)
 
 if __name__ == "__main__":
     url = input("Enter news article URL: ")
-    markdown_content = get_metered_content(url)
+    markdown_content = get_article_content(url)
     print("\n" + "="*50 + " ARTICLE CONTENT " + "="*50)
     print(markdown_content)
     pyperclip.copy(markdown_content)

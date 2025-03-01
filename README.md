@@ -1,6 +1,8 @@
 ### **For learning purposes only.**
 
-Last Updated: 2025.3.1
+
+Note: Secondary pictures aren't supported because they are usually used in an canvas element.
+Last Updated: 2025.3.2
 
 To run the script:
 
